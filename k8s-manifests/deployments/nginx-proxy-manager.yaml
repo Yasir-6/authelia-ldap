@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-proxy-manager
+  namespace: auth-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-proxy-manager
+  template:
+    metadata:
+      labels:
+        app: nginx-proxy-manager
+    spec:
+      containers:
+      - name: nginx-proxy-manager
+        image: jc21/nginx-proxy-manager:latest
+        ports:
+        - containerPort: 80
+        - containerPort: 81
+        - containerPort: 443
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: letsencrypt
+          mountPath: /etc/letsencrypt
+        - name: snippets
+          mountPath: /snippets
+          readOnly: true
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        env:
+        - name: DISABLE_IPV6
+          value: "true"
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: nginx-data
+      - name: letsencrypt
+        persistentVolumeClaim:
+          claimName: nginx-letsencrypt
+      - name: snippets
+        configMap:
+          name: nginx-snippets

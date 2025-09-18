@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: authelia-service
+  namespace: auth-system
+spec:
+  selector:
+    app: authelia
+  ports:
+    - port: 9091
+      targetPort: 9091
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lldap-service
+  namespace: auth-system
+spec:
+  selector:
+    app: lldap
+  ports:
+    - name: ldap
+      port: 3890
+      targetPort: 3890
+    - name: web
+      port: 17170
+      targetPort: 17170
+  type: ClusterIP
