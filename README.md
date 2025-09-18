@@ -1,53 +1,43 @@
-# EKS Authentication Setup
+# EKS Authelia + LLDAP Authentication Setup
 
-## Prerequisites
-1. EKS cluster with NGINX Ingress Controller installed
-2. kubectl configured for your EKS cluster
-3. Domain `yasirbhati.site` pointing to your NGINX Ingress LoadBalancer
-4. cert-manager installed for SSL certificates
+Cloud-native authentication system for EKS using Authelia and LLDAP.
 
-## Deployment Steps
+## Quick Start
 
-1. **Create namespace:**
+1. **Install prerequisites:**
    ```bash
-   kubectl create namespace auth-system
+   # NGINX Ingress Controller
+   kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.1/deploy/static/provider/aws/deploy.yaml
+   
+   # cert-manager
+   kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.0/cert-manager.yaml
+   
+   # SSL issuer
+   kubectl apply -f cert-manager-setup.yaml
    ```
 
-2. **Apply configurations in order:**
+2. **Deploy authentication system:**
    ```bash
-   # Secrets and ConfigMaps
-   kubectl apply -f k8s-manifests/secrets/
-   kubectl apply -f k8s-manifests/configmaps/
-   
-   # Storage
-   kubectl apply -f k8s-manifests/pvc/
-   
-   # Services
-   kubectl apply -f k8s-manifests/services/
-   
-   # Deployments
-   kubectl apply -f k8s-manifests/deployments/
-   
-   # Ingress (after deployments are ready)
-   kubectl apply -f k8s-manifests/ingress/
+   chmod +x clean-deploy.sh
+   ./clean-deploy.sh
    ```
 
-3. **Verify deployment:**
+3. **DNS Setup:**
    ```bash
-   kubectl get pods -n auth-system
-   kubectl get ingress -n auth-system
+   # Get LoadBalancer IP
+   kubectl get svc ingress-nginx-controller -n ingress-nginx
+   
+   # Point these domains to the IP:
+   # authelia.yasirbhati.site
+   # ldap-php.yasirbhati.site
    ```
 
 ## Access URLs
-- Authelia: https://auth.yasirbhati.site
-- LLDAP Admin: https://ldap.yasirbhati.site
-- NGINX Proxy Manager: https://proxy.yasirbhati.site
+- **Authelia**: https://authelia.yasirbhati.site
+- **LLDAP Admin**: https://ldap-php.yasirbhati.site
 
 ## Default Credentials
-- LLDAP Admin: admin / super_strong_ldap_password
-- NGINX Proxy Manager: admin@example.com / changeme
+- **LLDAP**: admin / super_strong_ldap_password
 
-## Important Notes
-- Change all default passwords in secrets before production use
-- Update JWT secrets with your own random values
-- Ensure your domain DNS points to the NGINX Ingress LoadBalancer IP
+## Protect Your Apps
+Use `k8s-manifests/ingress/protected-app-example.yaml` as template.
