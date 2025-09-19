@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: authelia
-        image: authelia/authelia:v4.37
+        image: authelia/authelia:4.37.5
         ports:
         - containerPort: 9091
         envFrom:
